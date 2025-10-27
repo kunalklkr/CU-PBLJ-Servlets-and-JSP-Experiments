@@ -1,0 +1,15 @@
+CREATE DATABASE IF NOT EXISTS company;
+
+USE company;
+
+CREATE TABLE Employee (
+    EmpID INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Salary DECIMAL(10, 2)
+);
+
+INSERT INTO Employee (EmpID, Name, Salary) VALUES
+(101, 'Aditya Sharma', 75000.00),
+(102, 'Priya Singh', 80000.00),
+(103, 'Rohan Mehta', 65000.00),
+(104, 'Sneha Patel', 90000.00);
