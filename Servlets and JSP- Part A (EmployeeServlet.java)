@@ -1,0 +1,128 @@
+package com.example.servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@WebServlet("/employees")
+public class EmployeeServlet extends HttpServlet {
+
+    private static final long serialVersionUID = 1L;
+
+    private static class DBUtil {
+
+        private static final String JDBC_URL = "jdbc:mysql://localhost:3306/company";
+        private static final String JDBC_USER = "root";
+        private static final String JDBC_PASS = "your_password";
+
+        public static Connection getConnection() throws SQLException {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+            } catch (ClassNotFoundException e) {
+                throw new SQLException("MySQL JDBC Driver not found", e);
+            }
+            return DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
+        }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        
+        String empIdStr = request.getParameter("empId");
+
+        out.println("<html>");
+        out.println("<head><title>Employee Records</title>");
+        out.println("<style>");
+        out.println("body { font-family: Arial, sans-serif; margin: 20px; }");
+        out.println("table { border-collapse: collapse; width: 50%; }");
+        out.println("th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }");
+        out.println("th { background-color: #f2f2f2; }");
+        out.println("form { margin-bottom: 20px; }");
+        out.println("</style>");
+        out.println("</head><body>");
+        out.println("<h1>Employee Management</h1>");
+
+        out.println("<h2>Search for Employee</h2>");
+        out.println("<form action='employees' method='GET'>");
+        out.println("  <label for='empId'>Employee ID: </label>");
+        out.println("  <input type='text' id='empId' name='empId'>");
+        out.println("  <input type='submit' value='Search'>");
+        out.println("</form>");
+        out.println("<hr>");
+
+        if (empIdStr != null && !empIdStr.isEmpty()) {
+            displaySingleEmployee(out, empIdStr);
+        } else {
+            displayAllEmployees(out);
+        }
+
+        out.println("</body></html>");
+        out.close();
+    }
+
+    private void displayAllEmployees(PrintWriter out) {
+        String sql = "SELECT * FROM Employee";
+        
+        try (Connection conn = DBUtil.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            out.println("<h2>All Employees</h2>");
+            out.println("<table>");
+            out.println("<tr><th>ID</th><th>Name</th><th>Salary</th></tr>");
+
+            while (rs.next()) {
+                int id = rs.getInt("EmpID");
+                String name = rs.getString("Name");
+                double salary = rs.getDouble("Salary");
+                out.println("<tr><td>" + id + "</td><td>" + name + "</td><td>" + String.format("%.2f", salary) + "</td></tr>");
+            }
+            out.println("</table>");
+
+        } catch (SQLException e) {
+            out.println("<p style='color:red;'>Database Error: " + e.getMessage() + "</p>");
+        }
+    }
+
+    private void displaySingleEmployee(PrintWriter out, String empIdStr) {
+        String sql = "SELECT * FROM Employee WHERE EmpID = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            int empId = Integer.parseInt(empIdStr);
+            pstmt.setInt(1, empId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    out.println("<h2>Employee Details</h2>");
+                    out.println("<p><b>ID:</b> " + rs.getInt("EmpID") + "</p>");
+                    out.println("<p><b>Name:</b> " + rs.getString("Name") + "</p>");
+                    out.println("<p><b>Salary:</b> " + String.format("%.2f", rs.getDouble("Salary")) + "</p>");
+                } else {
+                    out.println("<p style='color:red;'>Employee with ID " + empId + " not found.</p>");
+                }
+            }
+
+        } catch (NumberFormatException e) {
+            out.println("<p style='color:red;'>Error: Invalid Employee ID format. Please enter a number.</p>");
+        } catch (SQLException e) {
+            out.println("<p style='color:red;'>Database Error: " + e.getMessage() + "</p>");
+        }
+    }
+}
