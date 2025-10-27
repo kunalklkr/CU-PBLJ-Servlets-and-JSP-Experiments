@@ -1,0 +1,43 @@
+<%@ page import="java.time.LocalDate" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Portal</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; display: grid; place-items: center; min-height: 80vh; background-color: #f9f9f9; }
+        form { background: #fff; border: 1px solid #ccc; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { text-align: center; }
+        div { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="date"], select { width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        input[type="submit"] { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        input[type="submit"]:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+
+    <form action="markAttendance" method="POST">
+        <h2>Student Attendance Portal</h2>
+        <div>
+            <label for="studentId">Student ID:</label>
+            <input type="text" id="studentId" name="studentId" required>
+        </div>
+        <div>
+            <label for="attendanceDate">Date:</label>
+            <input type="date" id="attendanceDate" name="attendanceDate" value="<%= LocalDate.now() %>" required>
+        </div>
+        <div>
+            <label for="status">Status:</label>
+            <select id="status" name="status">
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+            </select>
+        </div>
+        <div>
+            <input type="submit" value="Submit Attendance">
+        </div>
+    </form>
+
+</body>
+</html>
