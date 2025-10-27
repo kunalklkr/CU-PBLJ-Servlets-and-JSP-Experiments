@@ -1,0 +1,10 @@
+CREATE DATABASE IF NOT EXISTS school;
+
+USE school;
+
+CREATE TABLE Attendance (
+    StudentID VARCHAR(20) NOT NULL,
+    AttendanceDate DATE NOT NULL,
+    Status VARCHAR(10) NOT NULL,
+    PRIMARY KEY (StudentID, AttendanceDate)
+);
